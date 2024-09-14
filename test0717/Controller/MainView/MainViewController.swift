@@ -43,9 +43,6 @@ class MainViewController: UIViewController {
         }
         print("fileURL : \(realm.configuration.fileURL!)")
     
-    
-    
-    
     }
     func setUI() {
         tableSet()
@@ -102,7 +99,7 @@ class MainViewController: UIViewController {
     
     @IBAction func SortButton(_ sender: Any) {
         let realm = try! Realm()
-        let Message_Board = try! Realm().objects(MessageBoard.self)
+        let Message_Board = realm.objects(MessageBoard.self)
         if Message_Board.count == 0 {
             let controller = UIAlertController(title: "沒有輸入留言", message: "請輸入留言", preferredStyle: .alert)
             let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
@@ -206,27 +203,33 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource{
         return UISwipeActionsConfiguration(actions: [deleteAction])
         
     }
+    
+    
     func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        //這邊創建了一個實例UIContextualAction，style是正常樣式
+        //{ [self] (_,_, completionHandler) 這邊是閉包的開始，前面兩個參數是_可以忽略不看，最後一個completionHandler是操作完成後，要呼叫這個參數，並告訴系統已完成操作
         let editAction = UIContextualAction(style: .normal, title: "edit") { [self] (_,_, completionHandler) in self.button.setTitle("編輯", for: .normal)
             self.button.backgroundColor = UIColor.magenta
+            
+        //if indexPath.row < self.MessageArray.count 是用來檢查這個索引有沒有超出範圍
             if indexPath.row < self.MessageArray.count{
                 self.edit_cell = self.MessageArray[indexPath.row]
                 self.UserName.text = self.edit_cell?.Name
                 self.tvtext.text = self.edit_cell?.Constent
                 
                 let edit_CurrenTime = self.edit_cell?.CurrenTime
+                //打開資料庫
                 let realm = try! Realm()
-                
+                //這邊從資料庫查找時間相同的資料，currenTime是抓取第一個符合條件的對象
                 editCell_Time = realm.objects(MessageBoard.self).where{
                     $0.CurrenTime == edit_CurrenTime ?? ""
                 }[0]
                 
             }
+            //刷新tableview內的資料
             self.tbview.reloadData()
             }
             return UISwipeActionsConfiguration(actions: [editAction])
-        
-        
     }
                                            
     
